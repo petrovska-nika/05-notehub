@@ -9,7 +9,7 @@ const headers = {
 };
 
 export interface FetchNotesResponse {
-  results: Note[];
+  notes: Note[];
   totalPages: number;
 }
 

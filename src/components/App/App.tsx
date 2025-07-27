@@ -13,6 +13,7 @@ import type {
   FetchNotesResponse,
   CreateNotePayload,
   Note,
+  NoteTag,
 } from "../../services/noteService";
 
 import css from "./App.module.css";
@@ -28,6 +29,7 @@ function App() {
   const { data, isLoading, isError } = useQuery<FetchNotesResponse, Error>({
     queryKey: ["notes", page, debouncedQuery],
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedQuery }),
+    placeholderData: (prev) => prev,
   });
 
   const createNoteMutation = useMutation<Note, Error, CreateNotePayload>({
@@ -42,8 +44,8 @@ function App() {
     setPage(1);
   };
 
-  const handleAddNote = (title: string, content: string) => {
-    createNoteMutation.mutate({ title, content, tag: "Todo" });
+  const handleAddNote = (title: string, content: string, tag: NoteTag) => {
+    createNoteMutation.mutate({ title, content, tag });
     setShowModal(false);
   };
 
@@ -59,14 +61,9 @@ function App() {
       {isLoading && <p>Loading...</p>}
       {isError && <p>Error loading notes.</p>}
 
-      {data && data.results.length > 0 && (
+      {data && data.notes.length > 0 && (
         <>
-          <NoteList
-            notes={data.results}
-            onDeleteSuccess={() =>
-              queryClient.invalidateQueries({ queryKey: ["notes"] })
-            }
-          />
+          <NoteList notes={data.notes} />
           {data.totalPages > 1 && (
             <Pagination
               currentPage={page}
@@ -77,7 +74,7 @@ function App() {
         </>
       )}
 
-      {data && data.results.length === 0 && <p>No notes found.</p>}
+      {data && data.notes.length === 0 && <p>No notes found.</p>}
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <NoteForm

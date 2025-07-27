@@ -1,3 +1,4 @@
+import ReactPaginate from "react-paginate";
 import styles from "./Pagination.module.css";
 
 interface PaginationProps {
@@ -11,21 +12,31 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const handlePageClick = (event: { selected: number }) => {
+    onPageChange(event.selected + 1);
+  };
 
   return (
-    <div className={styles.pagination}>
-      {pages.map((page) => (
-        <button
-          key={page}
-          className={`${styles.button} ${
-            page === currentPage ? styles.active : ""
-          }`}
-          onClick={() => onPageChange(page)}
-        >
-          {page}
-        </button>
-      ))}
-    </div>
+    <ReactPaginate
+      previousLabel={"← Previous"}
+      nextLabel={"Next →"}
+      breakLabel={"..."}
+      pageCount={totalPages}
+      forcePage={currentPage - 1}
+      marginPagesDisplayed={2}
+      pageRangeDisplayed={3}
+      onPageChange={handlePageClick}
+      containerClassName={styles.pagination}
+      pageClassName={styles.pageItem}
+      pageLinkClassName={styles.pageLink}
+      previousClassName={styles.pageItem}
+      previousLinkClassName={styles.pageLink}
+      nextClassName={styles.pageItem}
+      nextLinkClassName={styles.pageLink}
+      breakClassName={styles.pageItem}
+      breakLinkClassName={styles.pageLink}
+      activeClassName={styles.active}
+      disabledClassName={styles.disabled}
+    />
   );
 };

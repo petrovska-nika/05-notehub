@@ -1,29 +1,30 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
+import type { NoteTag } from "../../services/noteService";
 import styles from "./NoteForm.module.css";
 
 interface NoteFormProps {
-  onSubmit: (title: string, content: string) => void;
+  onSubmit: (title: string, content: string, tag: NoteTag) => void;
   onSuccess: () => void;
 }
 
 export const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onSuccess }) => {
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tag, setTag] = useState<NoteTag>("Todo");
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const trimmedTitle = title.trim();
-      const trimmedContent = content.trim();
-      if (!trimmedTitle || !trimmedContent) return;
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim()) return;
+    onSubmit(title.trim(), content.trim(), tag);
+    setTitle("");
+    setContent("");
+    setTag("Todo");
+    onSuccess();
+  };
 
-      onSubmit(trimmedTitle, trimmedContent);
-      onSuccess();
-      setTitle("");
-      setContent("");
-    },
-    [title, content, onSubmit, onSuccess]
-  );
+  const handleCancel = () => {
+    onSuccess();
+  };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
@@ -32,22 +33,34 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onSuccess }) => {
         type="text"
         placeholder="Title"
         value={title}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setTitle(e.target.value)
-        }
+        onChange={(e) => setTitle(e.target.value)}
       />
       <textarea
         className={styles.textarea}
         rows={4}
         placeholder="Content"
         value={content}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setContent(e.target.value)
-        }
+        onChange={(e) => setContent(e.target.value)}
       />
-      <button className={styles.button} type="submit">
-        Add Note
-      </button>
+      <select
+        className={styles.select}
+        value={tag}
+        onChange={(e) => setTag(e.target.value as NoteTag)}
+      >
+        <option value="Todo">Todo</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Meeting">Meeting</option>
+        <option value="Shopping">Shopping</option>
+      </select>
+      <div className={styles.buttons}>
+        <button className={styles.button} type="submit">
+          Add Note
+        </button>
+        <button className={styles.button} type="button" onClick={handleCancel}>
+          Cancel
+        </button>
+      </div>
     </form>
   );
 };

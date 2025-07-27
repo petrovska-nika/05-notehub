@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import styles from "./NoteForm.module.css";
 
 interface NoteFormProps {
@@ -7,19 +7,23 @@ interface NoteFormProps {
 }
 
 export const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onSuccess }) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) return;
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const trimmedTitle = title.trim();
+      const trimmedContent = content.trim();
+      if (!trimmedTitle || !trimmedContent) return;
 
-    onSubmit(title, content);
-    onSuccess();
-
-    setTitle("");
-    setContent("");
-  };
+      onSubmit(trimmedTitle, trimmedContent);
+      onSuccess();
+      setTitle("");
+      setContent("");
+    },
+    [title, content, onSubmit, onSuccess]
+  );
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
@@ -28,14 +32,18 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onSuccess }) => {
         type="text"
         placeholder="Title"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setTitle(e.target.value)
+        }
       />
       <textarea
         className={styles.textarea}
         rows={4}
         placeholder="Content"
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          setContent(e.target.value)
+        }
       />
       <button className={styles.button} type="submit">
         Add Note

@@ -14,7 +14,7 @@ function NoteList({ page, search }: NoteListProps) {
     queryFn: () => fetchNotes({ page, perPage: 12, search }),
   });
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     await deleteNote(id);
     refetch();
   };

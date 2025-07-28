@@ -2,7 +2,13 @@ import axios from "axios";
 import type { Note, NoteTag } from "../types/note";
 
 const BASE_URL = "https://notehub-public.goit.study/api";
+
 const token = import.meta.env.VITE_NOTEHUB_TOKEN;
+if (!token) {
+  throw new Error(
+    "VITE_NOTEHUB_TOKEN is missing. Set it in Vercel project settings."
+  );
+}
 
 const headers = {
   Authorization: `Bearer ${token}`,
@@ -21,7 +27,7 @@ interface FetchNotesParams {
 
 export interface CreateNotePayload {
   title: string;
-  content: string;
+  content?: string;
   tag: NoteTag;
 }
 

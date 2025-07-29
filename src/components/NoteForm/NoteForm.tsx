@@ -14,15 +14,14 @@ interface NoteFormProps {
 }
 
 const validationSchema = Yup.object().shape({
-  title: Yup.string().required("Title is required"),
-  content: Yup.string(), // не обов'язкове
-  tag: Yup.mixed<NoteTag>().oneOf([
-    "Todo",
-    "Work",
-    "Personal",
-    "Meeting",
-    "Shopping",
-  ]),
+  title: Yup.string()
+    .min(3, "Must be at least 3 characters")
+    .max(50, "Must be at most 50 characters")
+    .required("Title is required"),
+  content: Yup.string().max(500, "Must be at most 500 characters"),
+  tag: Yup.mixed<NoteTag>()
+    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
+    .required("Tag is required"),
 });
 
 export const NoteForm: React.FC<NoteFormProps> = ({ onSuccess }) => {
@@ -30,10 +29,6 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onSuccess }) => {
 
   const mutation = useMutation<Note, Error, CreateNotePayload>({
     mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      onSuccess();
-    },
   });
 
   return (
@@ -41,8 +36,13 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onSuccess }) => {
       initialValues={{ title: "", content: "", tag: "Todo" as NoteTag }}
       validationSchema={validationSchema}
       onSubmit={(values, actions) => {
-        mutation.mutate(values);
-        actions.resetForm();
+        mutation.mutate(values, {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["notes"] });
+            onSuccess();
+            actions.resetForm();
+          },
+        });
       }}
     >
       <Form className={styles.form}>
@@ -69,7 +69,7 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onSuccess }) => {
 
         <div className={styles.buttons}>
           <button className={styles.button} type="submit">
-            Add Note
+            Create note
           </button>
           <button
             className={styles.button}
